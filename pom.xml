@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.confluent</groupId>
+    <artifactId>kafka-connect-storage-cloud</artifactId>
+    <version>5.2.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>io.lbg.kafka.connect.s3.parquet</groupId>
+  <artifactId>parquet-format</artifactId>
+  <version>5.2.0-SNAPSHOT</version>
+
+  <properties>
+    <aws.version>1.11.86</aws.version>
+    <s3mock.version>0.1.5</s3mock.version>
+    <kafka.connect.maven.plugin.version>0.11.1</kafka.connect.maven.plugin.version>
+    <parquet.version>1.10.0</parquet.version>
+    <confluent.maven.repo>http://packages.confluent.io/maven/</confluent.maven.repo>
+    <licenses.version>5.2.0-SNAPSHOT</licenses.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>confluent</id>
+      <name>Confluent</name>
+      <url>${confluent.maven.repo}</url>
+    </repository>
+    <repository>
+      <id>findify</id>
+      <url>https://dl.bintray.com/findify/maven/</url>
+    </repository>
+  </repositories>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-bom</artifactId>
+        <version>${aws.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.parquet</groupId>
+        <artifactId>parquet-format</artifactId>
+        <version>2.6.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.thrift</groupId>
+        <artifactId>libthrift</artifactId>
+        <version>0.9.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.thrift</groupId>
+        <artifactId>libfb303</artifactId>
+        <version>0.9.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.13</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.confluent</groupId>
+      <artifactId>kafka-connect-s3</artifactId>
+      <version>5.2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.findify</groupId>
+      <artifactId>s3mock_2.11</artifactId>
+      <version>${s3mock.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-Djava.awt.headless=true</argLine>
+          <excludedGroups>io.confluent.common.utils.IntegrationTest</excludedGroups>
+        </configuration>
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>-Djava.awt.headless=true</argLine>
+          <groups>io.confluent.common.utils.IntegrationTest</groups>
+          <!-- by default failsafe only includes class names that start or end in IT,
+               we use regular test class names with @Category and the group above -->
+          <includes>
+            <!-- defaults copied from maven-surefire-plugin -->
+            <include>**/Test*.java</include>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+            <include>**/*TestCase.java</include>
+            <!-- maven-failsafe-plugin defaults -->
+            <include>**/IT*.java</include>
+            <include>**/*IT.java</include>
+            <include>**/*ITCase.java</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.confluent</groupId>
+        <artifactId>kafka-connect-maven-plugin</artifactId>
+        <version>${kafka.connect.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>kafka-connect</goal>
+            </goals>
+            <configuration>
+              <title>Kafka Connect S3 Parquet Format</title>
+              <sourceUrl>https://github.com/llofberg/kafka-connect-s3-parquet-format</sourceUrl>
+              <documentationUrl>
+                https://github.com/llofberg/kafka-connect-s3-parquet-format
+              </documentationUrl>
+              <description>
+                The S3 connector Parquet format allows you to export data from Kafka topics to S3
+                objects in Parquet format.
+              </description>
+              <logo>logos/parquet_logo.png</logo>
+
+              <ownerUsername>llofberg</ownerUsername>
+              <ownerType>person</ownerType>
+              <ownerName>lenny</ownerName>
+
+              <componentTypes>
+                <componentType>sink</componentType>
+              </componentTypes>
+
+              <tags>
+                <tag>s3</tag>
+                <tag>aws</tag>
+                <tag>parquet</tag>
+              </tags>
+
+              <requirements>
+                <requirement>AWS S3 bucket with write permissions</requirement>
+              </requirements>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <id>test-compile</id>
+            <phase>process-test-sources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--<plugin>-->
+        <!--<artifactId>maven-assembly-plugin</artifactId>-->
+        <!--<configuration>-->
+          <!--<descriptors>-->
+            <!--<descriptor>src/assembly/development.xml</descriptor>-->
+            <!--<descriptor>src/assembly/package.xml</descriptor>-->
+          <!--</descriptors>-->
+          <!--<attach>false</attach>-->
+        <!--</configuration>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<id>make-assembly</id>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+              <!--<goal>single</goal>-->
+            <!--</goals>-->
+          <!--</execution>-->
+        <!--</executions>-->
+      <!--</plugin>-->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <shadedArtifactAttached>true</shadedArtifactAttached>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+          </filters>        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>1.14</version>
+
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.doxia</groupId>
+            <artifactId>doxia-core</artifactId>
+            <version>1.6</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.maven.doxia</groupId>
+            <artifactId>doxia-site-renderer</artifactId>
+            <version>1.6</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <configuration>
+              <suppressionsLocation>checkstyle/suppressions.xml</suppressionsLocation>
+              <failOnViolation>false</failOnViolation>
+              <failsOnError>false</failsOnError>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  </build>
+
+</project>
