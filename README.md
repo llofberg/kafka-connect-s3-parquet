@@ -16,7 +16,8 @@ Example
 
 1. Insert your AWS credentials to `example/.env`
 2. Create a bucket in S3 and insert the bucket name in `example/sink.json`
-3. Run following steps
+3. Copy target/parquet-format-5.2.0-SNAPSHOT-shaded.jar to example/jars/ folder
+4. Run following steps
 
 
         cd example
