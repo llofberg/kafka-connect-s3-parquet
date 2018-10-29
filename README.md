@@ -54,7 +54,7 @@ Check that files exist in you bucket, e.g.
 
 Copy the file(s) to a local folder and verify content
 
-        parquet-tools cat -j ~/Downloads/s3_topic+0+0000000000-3.parquet
+        parquet-tools cat -j ~/Downloads/s3_topic+0+0000000000.parquet
         {"f1":"1"}
         {"f1":"2"}
         {"f1":"3"}
